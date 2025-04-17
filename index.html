@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Secure Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    .login-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      background-color: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 1rem;
+    }
+
+    .dashboard {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+    .dashboard-header {
+      background-color: #667eea;
+      color: white;
+      padding: 1rem;
+      font-size: 24px;
+    }
+    .dashboard-tabs {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem;
+      background-color: #f0f0f0;
+    }
+    .tab-button {
+      flex: 1;
+      padding: 1rem;
+      margin: 0 1rem;
+      background-color: #e0e0e0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .tab-button.active {
+      background-color: #667eea;
+      color: white;
+    }
+    .tab-content {
+      flex: 1;
+      display: flex;
+      width: 100%;
+    }
+    .tab-pane {
+      display: none;
+      flex: 1;
+    }
+    .tab-pane.active {
+      display: flex;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div class="login-container" id="loginContainer">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="loginBtn">Login</button>
+    <p id="errorText" style="color: red; display: none;">Invalid credentials.</p>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="dashboard-header">Dashboard</div>
+    <div class="dashboard-tabs">
+      <button class="tab-button active" id="sensorsBtn">Sensors Data</button>
+      <button class="tab-button" id="wiltingBtn">Wilting AI</button>
+    </div>
+    <div class="tab-content">
+      <div id="sensorsContent" class="tab-pane active">
+        <iframe id="sensorIframe" src="https://share.geckoboard.com/dashboards/QCIUDQWFW3IPLQTU?ts=0"></iframe>
+      </div>
+      <div id="wiltingContent" class="tab-pane">
+        <iframe id="wiltingIframe" src="https://wilting-ai.web.app/?ts=0"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorText = document.getElementById('errorText');
+    const loginContainer = document.getElementById('loginContainer');
+    const dashboard = document.getElementById('dashboard');
+
+    const storedAccount = {
+      username: 'admin',
+      password: '1234'
+    };
+
+    loginBtn.onclick = () => {
+      const user = usernameInput.value;
+      const pass = passwordInput.value;
+      if (user === storedAccount.username && pass === storedAccount.password) {
+        loginContainer.style.display = 'none';
+        dashboard.style.display = 'flex';
+      } else {
+        errorText.style.display = 'block';
+      }
+    };
+
+    const sensorsBtn = document.getElementById('sensorsBtn');
+    const wiltingBtn = document.getElementById('wiltingBtn');
+    const sensorsContent = document.getElementById('sensorsContent');
+    const wiltingContent = document.getElementById('wiltingContent');
+    const sensorIframe = document.getElementById('sensorIframe');
+    const wiltingIframe = document.getElementById('wiltingIframe');
+
+    function reloadIframe(iframe, baseUrl) {
+      iframe.src = baseUrl + "?ts=" + new Date().getTime();
+    }
+
+    sensorsBtn.onclick = () => {
+      sensorsBtn.classList.add('active');
+      wiltingBtn.classList.remove('active');
+      sensorsContent.classList.add('active');
+      wiltingContent.classList.remove('active');
+      reloadIframe(sensorIframe, "https://share.geckoboard.com/dashboards/QCIUDQWFW3IPLQTU");
+    };
+
+    wiltingBtn.onclick = () => {
+      wiltingBtn.classList.add('active');
+      sensorsBtn.classList.remove('active');
+      sensorsContent.classList.remove('active');
+      wiltingContent.classList.add('active');
+      reloadIframe(wiltingIframe, "https://wilting-ai.web.app/");
+    };
+
+    // Auto-refresh every 3 minutes (180000 ms)
+    setInterval(() => {
+      reloadIframe(sensorIframe, "https://share.geckoboard.com/dashboards/QCIUDQWFW3IPLQTU");
+      reloadIframe(wiltingIframe, "https://wilting-ai.web.app/");
+    }, 180000);
+  </script>
+</body>
+</html>
